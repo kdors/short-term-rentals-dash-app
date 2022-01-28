@@ -117,7 +117,8 @@ app.layout = html.Div(children=[
                     {"label":"Issued", "value":"Issued"},
                     {"label":"Pending", "value":"Pending"}
                 ],
-                value="Issued"
+                value=["Issued"],
+                multi=True
             )],
             style={
                 "color":colors["text"],
@@ -165,7 +166,7 @@ app.layout = html.Div(children=[
     Output("location-map","figure"),
     Input("map-dropdown","value"))
 def update_map(status):
-    df_updated = df_last_add[df_last_add["current_status"] == status]
+    df_updated = df_last_add[df_last_add["current_status"].isin(status)]
     fig_map = px.scatter_mapbox(df_updated, lat="latitude", lon="longitude", hover_name="address", 
                         hover_data=["application_date", "current_status"], 
                         color_discrete_sequence=px.colors.qualitative.Safe, zoom=11, height=600)
