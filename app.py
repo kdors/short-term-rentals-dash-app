@@ -18,8 +18,16 @@ colors = {
 ''' Get data and clean up'''
 df = get_df()
 
+# only keep the most recent application date for each unique address
 df_last_add = df.sort_values("application_date").drop_duplicates("address", keep="last")
 df_last_add = df_last_add.drop(df_last_add[df_last_add["address"].isnull()].index)
+
+# separate out latitude and longitude from Location column
+lat = [d.get("latitude") for d in df_last_add["location"]]
+lon = [d.get("longitude") for d in df_last_add["location"]]
+
+df_last_add["latitude"] = list(map(float,lat))
+df_last_add["longitude"] = list(map(float,lon))
 
 
 ''' Application Count by Year Figure'''
@@ -60,6 +68,15 @@ fig_year_status.update_layout(
 )
 
 
+''' Location Map '''
+fig_map = px.scatter_mapbox(df_last_add, lat="latitude", lon="longitude", hover_name="address", 
+                        hover_data=["application_date", "current_status"], 
+                        color_discrete_sequence=px.colors.qualitative.Safe, zoom=11, height=600)
+
+fig_map.update_layout(mapbox_style="open-street-map")
+fig_map.update_layout(margin={"r":75,"t":25,"l":75,"b":25})
+
+
 ''' App Layout'''
 app.layout = html.Div(children=[
     html.H1(children='Short-Term Rentals in New Orleans',
@@ -90,12 +107,13 @@ app.layout = html.Div(children=[
 
     html.Div(children=[
             dcc.Graph(
-                id='applications-by-year',
-                figure=fig_year
+                id='location-map',
+                figure=fig_map
             )], 
             style={
                 "color":colors["text"],
-                "textAlign":"center"         
+                "textAlign":"center",    
+                "margin":"auto"
             }),
 
     html.Div(children=[
@@ -115,8 +133,8 @@ app.layout = html.Div(children=[
             ), 
 
             dcc.Graph(
-                id='year-status',
-                figure=fig_year_status
+                id='applications-by-year',
+                figure=fig_year
             )], 
             style={
                 "display":"flex",

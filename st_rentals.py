@@ -1,4 +1,5 @@
 import os
+from numpy import float64
 import pandas as pd
 from sodapy import Socrata
 from dotenv import load_dotenv
@@ -20,7 +21,7 @@ def get_df():
 
     # Convert to pandas DataFrame
     df = pd.DataFrame.from_records(results)
-    # clean
+    # Remove duplicates and rows with no application date
     df = df.drop(df.loc[df["current_status"] == "Duplicate"].index)
     df = df.drop(df.loc[df["application_date"].isnull()].index)
     df["application_date"] = pd.to_datetime(df["application_date"])
