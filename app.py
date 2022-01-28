@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 
@@ -34,7 +35,7 @@ df_last_add["longitude"] = list(map(float,lon))
 df_year_count = df_last_add.groupby("Year")["application_date"].count().reset_index()
 df_year_count.rename(columns={"Year":"Year", "application_date":"Application Count"}, inplace=True)
 
-fig_year = px.bar(df_year_count, x="Year", y="Application Count", color_discrete_sequence=px.colors.qualitative.Safe,
+fig_year = px.bar(df_year_count, x="Year", y="Application Count", color_discrete_sequence=px.colors.qualitative.Set3,
                     title="Number of New Applications Each Year")
 
 fig_year.update_layout(
@@ -47,7 +48,8 @@ fig_year.update_layout(
 df_status_count = df_last_add.groupby("current_status")["application_date"].count().reset_index()
 df_status_count.rename(columns={"current_status":"Current Status", "application_date":"Count"}, inplace=True)
 
-fig_status = px.bar(df_status_count, x="Current Status", y="Count", color_discrete_sequence=px.colors.qualitative.Safe)
+fig_status = px.bar(df_status_count, x="Current Status", y="Count", color_discrete_sequence=px.colors.qualitative.Set3,
+                    title="Current Status for All Addresses")
 
 fig_status.update_layout(
     plot_bgcolor=colors["background"],
@@ -106,9 +108,26 @@ app.layout = html.Div(children=[
             }),
 
     html.Div(children=[
+            html.Label("Application Current Status"),
+            dcc.Dropdown(
+                id="map-dropdown",
+                options=[
+                    {"label":"Denied", "value":"Denied"},
+                    {"label":"Expired", "value":"Expired"},
+                    {"label":"Issued", "value":"Issued"},
+                    {"label":"Pending", "value":"Pending"}
+                ],
+                value="Issued"
+            )],
+            style={
+                "color":colors["text"],
+                "margin":"25px 100px 0 75px",
+                "padding":"0 200px 0 0"
+            }),
+
+    html.Div(children=[
             dcc.Graph(
-                id='location-map',
-                figure=fig_map
+                id='location-map'
             )], 
             style={
                 "color":colors["text"],
@@ -117,9 +136,10 @@ app.layout = html.Div(children=[
             }),
 
     html.Div(children=[
-            html.H2("Applications By Current Status"),
+            html.H2("Deeper Dive into Short-Term Rental Applications"),
             '''
-            What is the current status for rental applications submitted more recently?
+            Just how many new applications are being submitted each year,
+            and what is the current status for all addresses in the short-term rental database?
             '''],
             style={
                 "color":colors["text"],
@@ -128,19 +148,31 @@ app.layout = html.Div(children=[
 
     html.Div(children=[
             dcc.Graph(
-                id='status-count',
-                figure=fig_status
+                id='applications-by-year',
+                figure=fig_year
             ), 
 
             dcc.Graph(
-                id='applications-by-year',
-                figure=fig_year
+                id='status-count',
+                figure=fig_status
             )], 
             style={
                 "display":"flex",
                 "flex-wrap":"wrap"})
 ])
 
+@app.callback(
+    Output("location-map","figure"),
+    Input("map-dropdown","value"))
+def update_map(status):
+    df_updated = df_last_add[df_last_add["current_status"] == status]
+    fig_map = px.scatter_mapbox(df_updated, lat="latitude", lon="longitude", hover_name="address", 
+                        hover_data=["application_date", "current_status"], 
+                        color_discrete_sequence=px.colors.qualitative.Safe, zoom=11, height=600)
+    fig_map.update_layout(mapbox_style="open-street-map")
+    fig_map.update_layout(margin={"r":75,"t":25,"l":75,"b":25})
+
+    return fig_map
 
 if __name__ == '__main__':
     app.run_server(debug=True)
