@@ -123,7 +123,8 @@ app.layout = html.Div(children=[
             style={
                 "color":colors["text"],
                 "margin":"25px 100px 0 75px",
-                "padding":"0 200px 0 0"
+                "padding":"0 200px 0 0",
+                "width":"30vw"
             }),
 
     html.Div(children=[
