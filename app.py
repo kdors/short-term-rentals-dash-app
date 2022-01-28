@@ -160,7 +160,8 @@ app.layout = html.Div(children=[
             )], 
             style={
                 "display":"flex",
-                "flex-wrap":"wrap"})
+                "flex-wrap":"wrap",
+                "justify-content":"center"})
 ])
 
 @app.callback(
