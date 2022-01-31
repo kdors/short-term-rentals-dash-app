@@ -10,7 +10,7 @@ from st_rentals import get_df
 app = dash.Dash(__name__)
 
 colors = {
-    "mainBackground": "#a9a9a9",
+    "mainBackground": "#dfdfde",
     "background": "#ffffff",
     "text": "#444444"
 }
@@ -40,7 +40,8 @@ fig_year = px.bar(df_year_count, x="Year", y="Application Count", color_discrete
 
 fig_year.update_layout(
     plot_bgcolor=colors["background"],
-    font_color=colors["text"]
+    font_color=colors["text"],
+    margin={"r":25,"t":50,"l":25,"b":50}
 )
 
 
@@ -53,127 +54,114 @@ fig_status = px.bar(df_status_count, x="Current Status", y="Count", color_discre
 
 fig_status.update_layout(
     plot_bgcolor=colors["background"],
-    font_color=colors["text"]
+    font_color=colors["text"],
+    margin={"r":25,"t":50,"l":25,"b":50}
 )
-
-
-''' Current Status By Year Figure'''
-df_year_status = df.groupby(["Year","current_status"])["application_date"].count().reset_index()
-df_year_status.rename(columns={"Year":"Year", "current_status":"Current Status", "application_date":"Count"}, inplace=True)
-
-fig_year_status = px.line(df_year_status, x="Year", y="Count", color="Current Status", 
-                            color_discrete_sequence=px.colors.qualitative.Safe)
-
-fig_year_status.update_layout(
-    plot_bgcolor=colors["background"],
-    font_color=colors["text"]
-)
-
-
-''' Location Map '''
-fig_map = px.scatter_mapbox(df_last_add, lat="latitude", lon="longitude", hover_name="address", 
-                        hover_data=["application_date", "current_status"], 
-                        color_discrete_sequence=px.colors.qualitative.Safe, zoom=11, height=600)
-
-fig_map.update_layout(mapbox_style="open-street-map")
-fig_map.update_layout(margin={"r":75,"t":25,"l":75,"b":25})
 
 
 ''' App Layout'''
 app.layout = html.Div(children=[
-    html.H1(children='Short-Term Rentals in New Orleans',
-            style={
-                "textAlign":"center",
-                "color":colors["text"]
-            }),
 
-    html.Div(children=[
-            html.H2("What is the state of current short-term rental applications in New Orleans?"),
-            '''
-            The year 2020 and the beginning of lockdowns saw a sharp decline in the number 
-            of submitted short-term rental applications.
-            ''',
-            html.Br(),
-            '''
-            In 2021, that number increased significantly, but still was not as high as pre-2020.
-            ''',
-            html.Br(),
-            '''
-            Will we see even more applications in 2022?
-            '''], 
-            style={
-                "padding":"10px",
-                "textAlign":"center",
-                "color":colors["text"]
-            }),
+    html.H1(children='Short-Term Rentals in New Orleans'),
 
-    html.Div(children=[
-            html.Label("Application Current Status"),
-            dcc.Dropdown(
-                id="map-dropdown",
-                options=[
-                    {"label":"Denied", "value":"Denied"},
-                    {"label":"Expired", "value":"Expired"},
-                    {"label":"Issued", "value":"Issued"},
-                    {"label":"Pending", "value":"Pending"}
-                ],
-                value=["Issued"],
-                multi=True
-            )],
-            style={
-                "color":colors["text"],
-                "margin":"25px 100px 0 75px",
-                "padding":"0 200px 0 0",
-                "width":"30vw"
-            }),
-
-    html.Div(children=[
+    html.Div(
+        className="first-row",
+        children=[
+        html.Div(
+            className="map",
+            children=[
             dcc.Graph(
                 id='location-map'
-            )], 
-            style={
-                "color":colors["text"],
-                "textAlign":"center",    
-                "margin":"auto"
-            }),
+            )]),
 
-    html.Div(children=[
-            html.H2("Deeper Dive into Short-Term Rental Applications"),
-            '''
-            Just how many new applications are being submitted each year,
-            and what is the current status for all addresses in the short-term rental database?
-            '''],
-            style={
-                "color":colors["text"],
-                "textAlign":"center"
-            }),
+        html.Div(
+            className="info-and-filters",
+            children=[
+            html.Div(
+                className="info",
+                children=[
+                html.H2("What is the state of current short-term rental applications in New Orleans?"),
+                    '''
+                    The year 2020 and the beginning of lockdowns saw a sharp decline in the number 
+                    of submitted short-term rental applications.
+                    ''',
+                    html.Br(),
+                    '''
+                    In 2021, that number increased significantly, but still was not as high as pre-2020.
+                    ''',
+                    html.Br(),
+                    '''
+                    Will we see even more applications in 2022?
+                    '''
+                ]),
+            html.Div(
+                className="filter",
+                children=[
+                html.H2("Map Filters"),
+                html.Label("Application Current Status"),
+                dcc.Dropdown(
+                    id="map-dropdown",
+                    options=[
+                        {"label":"Denied", "value":"Denied"},
+                        {"label":"Expired", "value":"Expired"},
+                        {"label":"Issued", "value":"Issued"},
+                        {"label":"Pending", "value":"Pending"}
+                    ],
+                    value=["Issued"],
+                    multi=True
+                ),
+                html.Label("Year"),
+                dcc.Dropdown(
+                    id="year-dropdown",
+                    options=[
+                        {"label":"2017", "value":2017},
+                        {"label":"2018", "value":2018},
+                        {"label":"2019", "value":2019},
+                        {"label":"2020", "value":2020},
+                        {"label":"2021", "value":2021},
+                        {"label":"2022", "value":2022},
+                    ],
+                    value=[2017,2018,2019,2020,2021,2022],
+                    multi=True
+                )]
+            )])
+        ]),
 
-    html.Div(children=[
+    html.Div(
+        className="second-row",
+        children=[
+        html.Div(
+            className="figure",
+            children=[
             dcc.Graph(
                 id='applications-by-year',
                 figure=fig_year
-            ), 
-
+            )]), 
+        html.Div(
+            className="figure",
+            children=[
             dcc.Graph(
                 id='status-count',
                 figure=fig_status
-            )], 
-            style={
-                "display":"flex",
-                "flex-wrap":"wrap",
-                "justify-content":"center"})
-])
+            )])
+            ])
+], style={
+    "backgroundColor":colors["mainBackground"],
+    "color":colors["text"],
+    "margin":0
+})
 
 @app.callback(
     Output("location-map","figure"),
-    Input("map-dropdown","value"))
-def update_map(status):
-    df_updated = df_last_add[df_last_add["current_status"].isin(status)]
+    Input("map-dropdown","value"),
+    Input("year-dropdown","value"))
+def update_map(status_values, year_values):
+    df_updated = df_last_add[(df_last_add["current_status"].isin(status_values)) & (df["Year"].isin(year_values))]
     fig_map = px.scatter_mapbox(df_updated, lat="latitude", lon="longitude", hover_name="address", 
                         hover_data=["application_date", "current_status"], 
                         color_discrete_sequence=px.colors.qualitative.Safe, zoom=11, height=600)
     fig_map.update_layout(mapbox_style="open-street-map")
-    fig_map.update_layout(margin={"r":75,"t":25,"l":75,"b":25})
+    fig_map.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
 
     return fig_map
 
