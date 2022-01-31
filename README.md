@@ -10,7 +10,5 @@ To get the data, you can download the CSV file found by going to the link above.
 
 **Using the API resulted in a dataframe with slightly different column names, and the location column data is different as well, so the code to clean the data found in app.py is slightly different.**
 
-### App Screenshot
-![App Screenshot](/dash-screenshot.png "App screenshot")
 
 
