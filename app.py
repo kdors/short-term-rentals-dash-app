@@ -35,13 +35,12 @@ df_last_add["longitude"] = list(map(float,lon))
 df_year_count = df_last_add.groupby("Year")["application_date"].count().reset_index()
 df_year_count.rename(columns={"Year":"Year", "application_date":"Application Count"}, inplace=True)
 
-fig_year = px.bar(df_year_count, x="Year", y="Application Count", color_discrete_sequence=px.colors.qualitative.Set3,
-                    title="Number of New Applications Each Year")
+fig_year = px.bar(df_year_count, x="Year", y="Application Count", color_discrete_sequence=px.colors.qualitative.Set3)
 
 fig_year.update_layout(
     plot_bgcolor=colors["background"],
     font_color=colors["text"],
-    margin={"r":25,"t":50,"l":25,"b":50}
+    margin={"r":10,"t":10,"l":10,"b":10}
 )
 
 
@@ -49,13 +48,12 @@ fig_year.update_layout(
 df_status_count = df_last_add.groupby("current_status")["application_date"].count().reset_index()
 df_status_count.rename(columns={"current_status":"Current Status", "application_date":"Count"}, inplace=True)
 
-fig_status = px.bar(df_status_count, x="Current Status", y="Count", color_discrete_sequence=px.colors.qualitative.Set3,
-                    title="Current Status for All Addresses")
+fig_status = px.bar(df_status_count, x="Current Status", y="Count", color_discrete_sequence=px.colors.qualitative.Set3)
 
 fig_status.update_layout(
     plot_bgcolor=colors["background"],
     font_color=colors["text"],
-    margin={"r":25,"t":50,"l":25,"b":50}
+    margin={"r":10,"t":10,"l":10,"b":10}
 )
 
 
@@ -133,6 +131,7 @@ app.layout = html.Div(children=[
         html.Div(
             className="figure",
             children=[
+            html.H3("Number of New Applications Each Year"),
             dcc.Graph(
                 id='applications-by-year',
                 figure=fig_year
@@ -140,10 +139,13 @@ app.layout = html.Div(children=[
         html.Div(
             className="figure",
             children=[
+            html.H3("Current Status for All Addresses"),
+            html.Div(
             dcc.Graph(
                 id='status-count',
                 figure=fig_status
-            )])
+            )),
+            html.H3("")])
             ])
 ], style={
     "backgroundColor":colors["mainBackground"],
