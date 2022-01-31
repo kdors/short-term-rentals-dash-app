@@ -90,7 +90,9 @@ app.layout = html.Div(children=[
                     html.Br(),
                     '''
                     Will we see even more applications in 2022?
-                    '''
+                    ''',
+                    html.Br(),
+                    html.Br()
                 ]),
             html.Div(
                 className="filter",
